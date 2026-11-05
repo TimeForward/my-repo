@@ -27,3 +27,6 @@ npm run tests:api
 ```
 
 Тесты используют публичные учебные сайты и требуют интернет-соединения.
+## Контакты
+
+GitHub: https://github.com/TimeForward
