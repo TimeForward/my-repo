@@ -1,0 +1,53 @@
+name: Manual Test Run
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run UI tests
+        run: npm run tests:ui -- --reporter=html
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-ui
+          PLAYWRIGHT_HTML_OPEN: never
+
+      - name: Run API tests
+        if: success() || failure()
+        run: npm run tests:api -- --reporter=html
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-api
+          PLAYWRIGHT_HTML_OPEN: never
+
+      - name: Upload UI report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-ui
+          path: playwright-report-ui/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload API report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-api
+          path: playwright-report-api/
+          retention-days: 7
+          if-no-files-found: warn
